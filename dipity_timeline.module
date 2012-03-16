@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function dipity_timeline_menu() {
+  $items = array();
+  $items['admin/config/services/dipity-timeline'] = array(
+    'title' => 'Dipity Timeline',
+    'description' => 'Configure Dipity Timeline API settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dipity_timeline_admin_settings'),
+    'file' => 'dipity_timeline.admin.inc',
+    'access arguments' => array('administer site configuration'),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function dipity_timeline_views_api() {
+  return array(
+    'api' => '3',
+  );
+}
+
+/**
+ * Generate the Dipity API secret
+ */
+function dipity_timeline_secret_generate($api_key = '', $api_secret = '') {
+  global $base_url;
+  return md5($api_secret . str_replace('http://', '', $base_url));
+}

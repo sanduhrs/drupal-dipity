@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function dipity_timeline_uninstall() {
+  variable_del('dipity_timeline_api_key');
+  variable_del('dipity_timeline_api_secret');
+  variable_del('dipity_timeline_api_signature');
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function dipity_timeline_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break at install time
+  $t = get_t();
+
+  if ($phase == 'runtime') {
+    $api_key = variable_get('dipity_timeline_api_key', '');
+    $api_secret = variable_get('dipity_timeline_api_secret', '');
+    $api_signature = variable_get('dipity_timeline_api_signature', '');
+    if (dipity_timeline_secret_generate($api_key, $api_secret) === $api_signature) {
+      $value = t('Available');
+      $description = '';
+      $severity = REQUIREMENT_OK;
+    }
+    else {
+      $value = t('Unavailable');
+      $description = t('No or wrong API settings have been provided. Please go 
+the !link to correct the settings.',
+        array(
+	      '!link' => l(t('Dipity settings page'), 'admin/config/services/dipity-timeline'),
+	    )
+      );
+      $severity = REQUIREMENT_WARNING;
+    }
+
+    $requirements['dipity_timeline'] = array(
+      'title' => t('Dipity Timeline API settings'),
+      'value' => $value,
+      'description' => $description,
+      'severity' => $severity,
+    );
+  }
+
+  return $requirements;
+}
