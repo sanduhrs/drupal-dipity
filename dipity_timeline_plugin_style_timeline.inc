@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Contains the list style plugin.
+ * Contains the dipity timeline style plugin.
  */
 
 /**
- * Style plugin to render each item in a slideshow of an ordered or unordered list.
+ * Style plugin to render each item in a timeline.
  *
  * @ingroup views_style_plugins
  */
@@ -59,26 +59,29 @@ class dipity_timeline_plugin_style_timeline extends views_plugin_style {
       //'defaultZoom' => '',
       //'gmtOffset' => '',
       //'intl' => '',
-      //'theme' => array(),
+      'theme' => array(),
       //'themes' => array(),
       'data' => array(),
     );
 
     foreach ($this->view->result as $key => $item) {
-      $events[] = array(
-        'eid' => $item->nid,
-        'x' => $item->node_created,
-        'title' => $item->node_title,
-        'author' => $item->users_node_name,
-        'authorURL' => url('user/' . $item->users_node_uid, array('absolute' => TRUE)),
-        'date' => format_date($item->node_created),
-        'description' => $item->field_body[0]['rendered']['#markup'],
-        'img' => file_create_url($item->field_field_image[0]['rendered']['#item']['uri']),
-        'll' => $item->field_field_geofield[0]['raw']['lat'] . ',' . $item->field_field_geofield[0]['raw']['lon'],
-        //'specificity' => '',
-        //'theme' => '',
-        //'v' => 0,
-      );
+      $event = array();
+      $event['eid'] = $item->nid;
+      $event['x'] = $item->node_created;
+      $event['title'] = $item->node_title;
+      $event['author'] = $item->users_node_name;
+      $event['authorURL'] = url('user/' . $item->users_node_uid, array('absolute' => TRUE));
+      $event['date'] = format_date($item->node_created);
+      $l = t('Read more at: ') . l($item->node_title, 'node/' . $item->nid, array('absolute' => TRUE));
+      $event['description'] = $item->field_body[0]['rendered']['#markup'] . $l . ' (Node: ' . $item->nid . ')';
+      $img = $item->field_field_image[0]['rendered']['#item']['uri'];
+      $event['img'] = $img ? file_create_url($img) : NULL;
+      $ll = $item->field_field_geolocation[0]['raw']['lat'] . ',' . $item->field_field_geolocation[0]['raw']['lon'];
+      $event['ll'] = $ll ? $ll : NULL;
+      $event['specificity'] = NULL;
+      $event['theme'] = NULL;
+      $event['v'] = NULL;
+      $events[] = $event;
     }
 
     $options['data']['events'] = $events;
